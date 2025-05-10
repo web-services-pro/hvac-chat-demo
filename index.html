@@ -4,14 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XYZ HVAC Company Demo - AI Chatbot - AI Chatbot</title>
+    <title>XYZ HVAC Company Demo - AI Chatbot</title>
     <style>
         :root {
             --primary-color: #2563eb;
             --secondary-color: #1d4ed8;
             --border-color: #e5e7eb;
         }
-        
         * { 
             box-sizing: border-box; 
             margin: 0; 
@@ -251,8 +250,8 @@
 <body>
     <div id="chat-container">
         <div id="chat-header">
-            <img src="https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png" alt="Bot Avatar">
-            <h2>XYZ HVAC Company Demo - AI Chatbot</h2>
+            <img src="https://c8.alamy.com/comp/2HW6Y8R/hvac-logo-design-illustration-vector-eps-format-suitable-for-your-design-needs-logo-illustration-animation-etc-2HW6Y8R.jpg" alt="Bot Avatar">
+            <h2>XYZ HVAC Company Demo</h2>
         </div>
         <div id="messages"></div>
         <div id="input-area">
@@ -335,7 +334,7 @@ Example Conversation to model for this step: You: "Can you tell me a little abou
 -- Commercial HVAC Services: 1) business type, 2) facility square footage, 3) specific HVAC needs (installation, replacement, maintenance), 4) current system type and age, 5) desired timeline, 6) budget allocation?  
 ###Final Note: 
 Remember to maintain the persona of Sam throughout the conversation, and keep the interaction engaging and personable.
-``;
+`;
         const INITIAL_MESSAGES = [{"content":"Hey, this is Sam from XYZ Heating & Cooling here in Houston. Is this the same [NAME] that requested a HVAC quote from us on [quote request date]?","isBot":true},{"content":"(This is a general demo, just answer and interact as if you are a property owner who needs HVAC work. this AI Chat can work for both old unsold and new fresh leads)","isBot":true}];
         
         const messagesDiv = document.getElementById('messages');
@@ -352,7 +351,7 @@ Remember to maintain the persona of Sam throughout the conversation, and keep th
             
             const avatar = document.createElement('img');
             avatar.className = 'avatar';
-            avatar.src = isUser ? 'https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png' : 'https://i.ibb.co/GPYsgkK/Web-Services-Pro-Logo-Black.png';
+            avatar.src = isUser ? 'https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png' : 'https://c8.alamy.com/comp/2HW6Y8R/hvac-logo-design-illustration-vector-eps-format-suitable-for-your-design-needs-logo-illustration-animation-etc-2HW6Y8R.jpg';
             avatar.alt = isUser ? 'User Avatar' : 'Bot Avatar';
             
             const messageContent = document.createElement('div');
@@ -389,7 +388,7 @@ Remember to maintain the persona of Sam throughout the conversation, and keep th
             const indicator = document.createElement('div');
             indicator.className = 'message bot';
             indicator.innerHTML = `
-                <img src="https://i.ibb.co/GPYsgkK/Web-Services-Pro-Logo-Black.png" alt="Bot Avatar" class="avatar">
+                <img src="https://c8.alamy.com/comp/2HW6Y8R/hvac-logo-design-illustration-vector-eps-format-suitable-for-your-design-needs-logo-illustration-animation-etc-2HW6Y8R.jpg" alt="Bot Avatar" class="avatar">
                 <div class="typing-indicator">
                     <div class="typing-dot"></div>
                     <div class="typing-dot"></div>
