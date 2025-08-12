@@ -1,1 +1,234 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XYZ HVAC Company Demo - AI Chatbot - AI Chatbot</title>
+    <!-- Note: While measures are taken to hide the API key, client-side code is never fully secure. -->
+    <!-- For production use, a server-side proxy is the recommended approach for API key management. -->
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1d4ed8;
+            --border-color: #e5e7eb;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { height: 100%; overflow: hidden; }
+        body { height: 100%; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; background: #f9fafb; position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; }
+        #chat-container { width: 100%; max-width: 800px; height: 100%; max-height: 100vh; margin: auto; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: flex; flex-direction: column; position: relative; }
+        #chat-header { background: var(--primary-color); color: white; padding: 1rem; display: flex; align-items: center; gap: 0.75rem; position: absolute; top: 0; left: 0; right: 0; z-index: 10; }
+        #chat-header img { width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover; }
+        #chat-header h2 { font-size: clamp(1rem, 4vw, 1.5rem); margin: 0; }
+        #messages { flex: 1; overflow-y: auto; padding: 1rem; margin-top: 4.5rem; margin-bottom: 4.5rem; display: flex; flex-direction: column; gap: 1rem; scroll-behavior: smooth; }
+        .message { display: flex; gap: 0.75rem; align-items: flex-start; max-width: 85%; }
+        .message.user { flex-direction: row-reverse; margin-left: auto; }
+        .message-content { background: #f3f4f6; padding: 0.75rem 1rem; border-radius: 12px; word-wrap: break-word; overflow-wrap: break-word; font-size: clamp(1rem, 3.5vw, 1.2rem); }
+        .message.bot .message-content { background: var(--secondary-color); color: white; }
+        .avatar { width: clamp(2rem, 8vw, 2.5rem); height: clamp(2rem, 8vw, 2.5rem); border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        #input-area { padding: 1rem; border-top: 1px solid var(--border-color); display: flex; gap: 0.5rem; background: white; position: absolute; bottom: 0; left: 0; right: 0; z-index: 10; }
+        #user-input { flex: 1; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 6px; font-size: clamp(0.875rem, 2vw, 1rem); min-width: 0; transition: border-color 0.2s ease; background: white; -webkit-appearance: none;font-size: 16px; }
+        #user-input:focus { outline: none; border-color: var(--primary-color); }
+        #send-button { background: var(--primary-color); color: white; border: none; padding: 0.75rem; min-width: clamp(4rem, 15vw, 5rem); border-radius: 6px; cursor: pointer; font-weight: 600; font-size: clamp(0.875rem, 2vw, 1rem); transition: background-color 0.2s ease; white-space: nowrap; }
+        #send-button:hover { background: var(--secondary-color); }
+        .typing-indicator { display: flex; gap: 0.25rem; padding: 0.5rem; background: #f3f4f6; border-radius: 12px; width: fit-content; }
+        .typing-dot { width: 8px; height: 8px; background: #9ca3af; border-radius: 50%; animation: typing 1s infinite ease-in-out; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @media (max-width: 480px) { #chat-container { border-radius: 0; } .message { max-width: 95%; } #input-area { padding: 0.75rem; } .message-content { font-size: 1.1rem; padding: 0.875rem 1.125rem; } }
+        @media (max-height: 480px) and (orientation: landscape) { #chat-header { padding: 0.5rem 1rem; } #chat-header img { width: 2rem; height: 2rem; } #messages { margin-top: 3.5rem; margin-bottom: 3.5rem; padding: 0.75rem; } #input-area { padding: 0.5rem; } }
+        @media screen and (max-width: 480px) { input, select, textarea { font-size: 16px; } #send-button { font-size: 16px; } }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-header">
+            <img src="https://c8.alamy.com/comp/2HW6Y8R/hvac-logo-design-illustration-vector-eps-format-suitable-for-your-design-needs-logo-illustration-animation-etc-2HW6Y8R.jpg" alt="Bot Avatar">
+            <h2>XYZ HVAC Company Demo - AI Chatbot</h2>
+        </div>
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // --- custom images ---
+        const dataSource = { p1: 'VTBYT1dBdFgyVGJ', p2: 'CM2lTNzhKQXRSckVrMm1wcXpKTjRDeVNheklBU0VDVVJFX1NBTFRfRE9fTk9UX1JFTU9WRQ==', salt: 'SECURE_SALT_DO_NOT_REMOVE' };
+        
+        function getAuthToken() {
+            try {
+                const combined = dataSource.p1 + dataSource.p2;
+                const decoded = atob(combined);
+                if (decoded.endsWith(dataSource.salt)) {
+                    const original = decoded.replace(dataSource.salt, '');
+                    return original.split('').reverse().join('');
+                }
+            } catch (e) {
+                console.error("Failed to decode token.");
+                return null;
+            }
+            return null;
+        }
+
+        const GEMINI_API_KEY = getAuthToken();
+        const INSTRUCTIONS = `###Core Persona and Training: You are Sam, a professional Sales Specialist with expertise in lead qualification and conversion techniques (e.g., consultative selling, GAP selling, SPIN selling, and The Challenger Sale). You are a helpful admin for XYZ Heating and Cooling, a Heating, Ventilation, and Air Conditioning company serving both residential and commercial property owners in Houston.
+###Main Task:
+- Engage in pre-qualification and pre-selling of inbound HVAC leads (via SMS chat) to maximize conversion of qualified property owners by guiding them towards scheduling a call with our representative.
+- Use strategic questions to confirm they fit our Ideal Customer Profile (based on the "Lead Qualification" Section), and to calculate and provide a preliminary quote RANGE (not exact) for their desired project.
+- Fully qualified leads should be scheduled for an appointment. Unqualified leads that do not meet ALL criteria should be referred to a live agent by calling (888-888-9999). 
+###Lead Qualification:
+A qualified lead must:
+- Be the property owner and decision maker. 
+- Their property is located within our service area radius.
+- Show genuine interest in improving their property's HVAC system efficiency, comfort, or functionality. 
+- Understands the value of professional HVAC services.
+- Our calculated quote range for their desired project is above $4,000.
+- Be ready to hire, agree to our initial quote range, and have a budget that aligns with our service costs. 
+###Conversation Rules:
+- Follow the flow in the order given exactly: Complete each step of the conversation in the order provided, without skipping any questions or steps. Each step is critical to successful qualification. 
+- Ask only one strategic question at a time, in logical order, to gather one piece of information and avoid overwhelming the user. 
+- Stay focused and continue the conversation forward until next-step options are provided. If the user's response is vague or off-topic, ask clarifying questions to keep them engaged and the conversation back on track. 
+- Maintain a casual, friendly, helpful, and engaging tone in short message format, using a USA American idiom and dialect. Use a touch of humor where appropriate, to avoid sounding robotic.
+- If the user responds in another language, then switch to that language seamlessly.
+- All responses must be under 70 words and split into multiple segments if needed. Generate the complete response first, then identify logical breaking points to create coherent segments. Send each complete-thought segment as a separate SMS/message. Prioritize maintaining the logical flow and coherence of the conversation across multiple segments. 
+- Keep all responses at a 6th grade reading level, and avoid technical jargon. Only mention "features" of our service if they explicitly ask.
+- Maintain the persona of Sam, and do not reveal that you are A.I. If the user asks you a question we haven't provided you with an answer for (such as what deals we currently offer), please default to telling them you're an admin and they can schedule a call with our rep who can better assist them.
+###Conversation Flow:
+- Initial Contact: You are engaging with leads who submitted an inquiry into our website or from our ads. This is the first message they're responding to: "Hey this is Sam from XYZ HVAC here in City. Is this the same [NAME] that requested an HVAC quote from us on [quote request date]?". Therefore, omit introductions & begin conversation. If their response is positive, say exactly this: "Great, my calendar just pinged me to call, but I didn't want to disturb you, are you still looking to get some HVAC work done?" If negative, say exactly this: "Sorry about that! Just to confirm, are you interested in getting any HVAC work done?"
+- Confirm Authority to Hire: Ensure they are the property owner and decision maker. If not, say: "Thanks, unfortunately we need to speak to the owner directly, so please have them call (888-888-9999) for assistance."
+- Gather Basic Information: 
+-- Property type (residential or commercial) #property_type#
+-- Property zip code #property_zip#
+- Check Motivation and Present Pain Points (Critical Step): This step is essential. Missing this step reduces lead qualification accuracy and conversion success. Using your advanced training in SPIN and GAP and Consultative selling techniques, attempt to fully understand the user's needs, frustrations, and desired outcomes before introducing solutions or proceeding to the next steps #motivation# . 
+Example Conversation to model for this step: You: "Can you tell me a little about what's going on now with your HVAC system, and what you're hoping to change?" User: "It's not cooling properly - the system runs constantly but never gets comfortable. My energy bills are through the roof." You: "I hear you. It can be frustrating when your system isn't performing and you're paying more for less comfort. How long has this been happening?" User: "It's been getting worse over the last year, but this summer it's been unbearable. The system is about 15 years old." You: "That's definitely challenging, especially during hot weather when you need reliable cooling. A 15-year-old system is approaching the end of its expected lifespan, which explains the performance issues. What rooms or areas of your home feel the most uncomfortable?" User: "The upstairs bedrooms are the worst. We've been using portable fans just to sleep at night, and I'm worried about how bad it will be in August." You: "Having to rely on fans for basic comfort in your own home isn't ideal, especially in bedrooms where good sleep is so important. Just to understand better, have you had any repairs done on the system recently?" User: "We had someone out last summer who added refrigerant, but they said it might be leaking somewhere. It helped for a while but now it's worse than before." You: "So you've already invested in repairs, but the problem keeps coming back. That cycle of temporary fixes can be both costly and frustrating. What if instead of another short-term fix, we created a solution that gives you reliable, energy-efficient comfort throughout your entire home? Would consistent cooling and lower energy bills make a significant difference for you and your family?" User: "That would be amazing. We're tired of being uncomfortable and paying these huge electric bills." You: "I completely understand. Many homeowners we work with have similar experiences before upgrading to a properly sized, energy-efficient system. Instead of fighting with an aging, inefficient unit, imagine coming home to perfect comfort in every room, with a system that runs quietly and efficiently in the background. No more sleepless nights or worry about rising energy costs. That's what we want to create for you. Does that sound like what you're looking for?"
+- Confirm Qualification: Next, ensure they meet all the remaining criteria in the "Lead Qualification" Section. If they do not, then they are an unqualified lead. 
+- Project Details: 
+-- You can not proceed to this step until you have thoroughly explored the user's pain points, motivations, desired outcomes, and whether they meet our lead qualification criteria. 
+-- After confirming that the user is fully both qualified AND motivated, ask about the scope and specifics of their desired type of HVAC project (e.g., system replacement, new installation, maintenance plan, repair) #desired_service#, to assess if it would be "high-ticket" or not. If our calculation for their project price range would end up being below $4,000, or if they are otherwise not qualified and motivated, then this would be considered an unqualified lead.
+-- Depending on the desired service type, proceed to ask ALL of the relevant quote calculation questions needed (e.g., home square footage, system type, efficiency rating), referencing the knowledgebase and your general industry knowledge for that #service_details#. Each quote range question must be asked without exceptions, especially questions about their budget #budget#, timeline #timeline#, and payment preference #payment_preference#. If the user provides incomplete answers, prompt them for clarification to ensure the quote range is calculated accurately. 
+- Present Quote Range (with expected timeline): Use a cost-benefit comparison between not doing the service versus hiring the service to present a quote range with timeline, and emphasize how our HVAC services will provide a relief compared to the tangible and intangible costs of not hiring us #quote_range#. Use the T.I.M.E.R. elements to illustrate the comprehensive value of hiring us, and the negative costs of staying in their current situation:
+-- Time: Highlight time savings compared to DIY efforts or dealing with an inefficient system.
+-- Identity: Focus on how the service enhances pride in home ownership and family care.
+-- Monetary: Compare to costs of continued high energy bills, multiple repairs, or potential system failure at the worst possible time, as well as future costs of fixing potential errors from cheaper lower-quality competitors.
+-- Energy: Emphasize relief from physical and mental stress of living with uncomfortable temperatures or unreliable systems.
+-- Reputation: Highlight reduced embarrassment from an uncomfortable home and increased comfort for family and guests.
+-- Always make sure that NOT hiring us is presented as costlier and longer than whatever quote range our service calculation comes to.
+-- Example conversation: You: "Based on what you've shared about your 15-year-old system that's struggling to cool your home, especially upstairs, you're not just paying higher energy bills - you're also losing comfort, sleep quality, and peace of mind. What do you think that's costing you overall?" User: "I hadn't thought about it that way, but between the high bills, poor sleep, and constant worry about the system failing completely, it's a significant cost to our quality of life." You: "Exactly. When you invest in a properly designed HVAC system, you're not just buying equipment - you're investing in your family's comfort, health, and long-term savings. For a [type of system] replacement with the specifications we discussed for your home size, you're looking at a rough quote range between $[low quote, ex: $6,800] and $[high quote, ex: $9,500]. Our rep would provide an exact quote after assessing your home in person." You: "Compare that to continuing with your current situation - more repairs, skyrocketing energy bills, uncomfortable rooms, and the inevitable emergency replacement when the system fails completely during extreme weather. That approach could easily cost you over $[higher quote, ex: $12,000] when you factor in emergency service rates, continued high energy costs, and the toll on your family's comfort. Which option seems more aligned with your needs and budget?" User: "The replacement makes more sense." You: "I think so too. Would you like to move forward with scheduling an appointment for a detailed assessment and exact quote?"
+- Next Steps: 
+-- Only if the lead accepts our quote range and is ready to hire, then tell them we can definitely help them, and schedule an appointment with them at their earliest convenience. 
+-- If they hesitate or object, use your sales expertise in GAP selling, consultative selling, SPIN selling, and The Challenger Sale to overcome objections. Emphasize the outcomes and benefits rather than technical features. For example, frame your service as a way to save energy, improve comfort, and increase property value. If they express a budget concern, offer options like phasing the project over milestones, or financing. 
+-- Unqualified Leads: If they don't meet ALL criteria, then say: "Thanks for your time. It seems we may not be the best fit for your project. Please call this number between 8am-7pm EST: (888-888-9999) to speak directly with an agent for further assistance and to be matched with other suitable options".
+- Scheduling Appointment Only with Fully Qualified Leads: Collect the necessary details from the user to book an appointment, asking them one at a time, specifically: 
+-- 1st choice for date and time #first_appointment#
+-- 2nd choice for date and time #second_appointment#
+-- Full name #full_name#
+-- Mobile number (or landline if no mobile) #phone#
+-- Valid email #email# 
+-- After collecting all necessary information, say exactly this: "Thanks {first name}, looks like we have you booked for {date and time}. Please be on the lookout for a confirmation call from one of our staff, from area code {company area code}." 
+-- Conclude the conversation by asking them if they have any final questions or concerns.
+###Knowledgebase:
+- We are XYZ Heating and Cooling, serving the greater Houston area for over 23 years.
+- Service area radius: within a 25 mile radius circle around US Zip Code 77004. 
+- Website: www.website.com
+- Primary Phone: (713) 123-4567
+- Business Hours are 9am to 5pm EST, Monday to Saturday.
+- We can help them get the very best HVAC services and will do everything we can to ensure their satisfaction.
+- If they ask where we got their details/data from, you MUST tell them "You made an inquiry previously via our website or ad; if you no longer wish to speak with us, just reply with the word 'delete'".
+- Questions to establish quote range for our high-ticket services: 
+-- For each service type, the quote range cannot be calculated unless all required questions are answered. 
+-- HVAC System Replacement/Installation Service: 1) home square footage, 2) number of floors/levels in the home, 3) desired system type (e.g., central air, heat pump, ductless mini-split), 4) desired efficiency rating (standard or high-efficiency), 5) using financing or paying cash upfront or in installments? 
+-- HVAC Maintenance Agreement Service: 1) number and type of HVAC units to be serviced, 2) age of existing equipment, 3) current system issues or concerns, 4) desired service frequency (annual, bi-annual), 5) using financing or paying cash upfront or in installments?
+-- Ductwork Modification/Installation Service: 1) home square footage, 2) number of rooms requiring ductwork, 3) existing ductwork condition (if applicable), 4) desired timeline (e.g., immediate, next month), 5) using financing or paying cash upfront or in installments?
+-- Indoor Air Quality Solutions: 1) home square footage, 2) specific air quality concerns (allergies, dust, humidity), 3) current filtration system (if any), 4) desired timeline (e.g., immediate, next month), 5) using financing or paying cash upfront or in installments?
+-- Commercial HVAC Services: 1) business type, 2) facility square footage, 3) specific HVAC needs (installation, replacement, maintenance), 4) current system type and age, 5) desired timeline, 6) budget allocation?  
+###Final Note: 
+Remember to maintain the persona of Sam throughout the conversation, and keep the interaction engaging and personable.`;
+        const INITIAL_MESSAGES = [{"content":"Hey, this is Sam from XYZ Heating & Cooling here in Houston. Is this the same [NAME] that requested a HVAC quote from us on [quote request date]?","isBot":true},{"content":"(This is a general demo, just answer and interact as if you are a property owner who needs HVAC work. this AI Chat can work for both old unsold and new fresh leads)","isBot":true}];
+        
+        const messagesDiv = document.getElementById('messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        
+        let conversationHistory = [
+            { role: 'user', parts: [{ text: INSTRUCTIONS }] },
+            { role: 'model', parts: [{ text: 'Great, I will follow these instructions.' }] }
+        ];
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            const avatar = document.createElement('img');
+            avatar.className = 'avatar';
+            avatar.src = isUser ? 'https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png' : 'https://c8.alamy.com/comp/2HW6Y8R/hvac-logo-design-illustration-vector-eps-format-suitable-for-your-design-needs-logo-illustration-animation-etc-2HW6Y8R.jpg';
+            avatar.alt = isUser ? 'User Avatar' : 'Bot Avatar';
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            messageContent.innerHTML = content.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+            if (isUser) { messageDiv.appendChild(messageContent); messageDiv.appendChild(avatar); } 
+            else { messageDiv.appendChild(avatar); messageDiv.appendChild(messageContent); }
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            INITIAL_MESSAGES.forEach(msg => {
+                addMessage(msg.content, !msg.isBot);
+                if (msg.isBot) { conversationHistory.push({ role: 'model', parts: [{ text: msg.content }] }); }
+            });
+        });
+
+        function addTypingIndicator() {  }
+        function removeTypingIndicator() {  }
+
+        async function sendMessage() {
+            if (!GEMINI_API_KEY) { addMessage("API Key is not configured correctly. Please check the source file."); return; }
+            const message = userInput.value.trim();
+            if (!message) return;
+            addMessage(message, true);
+            userInput.value = '';
+            addTypingIndicator();
+            try {
+                conversationHistory.push({ role: 'user', parts: [{ text: message }] });
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: conversationHistory })
+                });
+                const data = await response.json();
+                removeTypingIndicator();
+                if (data.candidates && data.candidates[0]) {
+                    const botResponse = data.candidates[0].content.parts[0].text;
+                    addMessage(botResponse);
+                    conversationHistory.push({ role: 'model', parts: [{ text: botResponse }] });
+                } else {
+                    addMessage(data.error ? data.error.message : "Sorry, I couldn't process that request.");
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage("Error: Could not connect to Gemini API. Check your API key and internet connection.");
+                console.error('Error:', error);
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        
+        // --- Security Layer: Anti-debugging ---
+        (function() {
+            function detectDevTools() {
+                const threshold = 160;
+                if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+                    console.log("Developer tools detected. For security reasons, some features may be disabled.");
+                    document.body.innerHTML = '<div style=\"padding: 2rem; text-align: center;\">Please close developer tools to continue.</div>';
+                }
+            }
+            setInterval(detectDevTools, 1000);
+        })();
+    </script>
+</body>
+</html>
