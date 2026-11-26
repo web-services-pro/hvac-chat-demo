@@ -13,8 +13,8 @@ export default async function handler(req, res) {
 
     try {
         // 3. Forward the exact payload sent by your frontend to the Gemini API
-        // (We use gemini-3.5-flash as the default standard model)
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
+        // (We use gemini-4 as the default standard model)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-4-hydrogen:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
